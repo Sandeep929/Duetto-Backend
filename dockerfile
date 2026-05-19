@@ -1,0 +1,22 @@
+# Build stage
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+
+# Copy the pom.xml and download dependencies first (for better caching)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Copy the source code and build
+COPY src ./src
+RUN mvn clean package -DskipTests
+
+# Run stage
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+
+# Copy only the compiled JAR file. 
+# NOTE: Replace 'duetto-0.0.1-SNAPSHOT.jar' with your actual jar's name from your pom.xml/target folder!
+COPY --from=build /app/target/duetto-0.0.1-SNAPSHOT.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
