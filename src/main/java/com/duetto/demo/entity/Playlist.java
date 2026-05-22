@@ -6,23 +6,29 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class User {
+public class Playlist {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
-	private String uid;
+	private String playlistId;
 	private String userId;
-	private String pass;
+	private String playlistName;
+	public String getPlaylistId() {
+		return playlistId;
+	}
+	public void setPlaylistId(String playlistId) {
+		this.playlistId = playlistId;
+	}
 	public String getUserId() {
 		return userId;
 	}
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	public String getPass() {
-		return pass;
+	public String getPlaylistName() {
+		return playlistName;
 	}
-	public void setPass(String pass) {
-		this.pass = pass;
+	public void setPlaylistName(String playlistName) {
+		this.playlistName = playlistName;
 	}
 }
-
