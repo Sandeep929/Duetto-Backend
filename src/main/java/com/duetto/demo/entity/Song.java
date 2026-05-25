@@ -14,6 +14,13 @@ public class Song {
 	private String title;
 	private String publicId;
 	private String url;
+	private int plays;
+	public int getPlays() {
+		return plays;
+	}
+	public void setPlays(int plays) {
+		this.plays = plays;
+	}
 	public Long getId() {
 		return id;
 	}

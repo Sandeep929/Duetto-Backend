@@ -27,15 +27,22 @@ public class CloudinaryService {
 	public Map uploadSong(MultipartFile song) {
 		
 		try {
+			String originalFileName = song.getOriginalFilename();
+			String filename = originalFileName.substring(0, originalFileName.lastIndexOf("."));
 			Map<String, Object> options = new HashMap<String, Object>();
 			
 			options.put("resource_type", "video");
 			options.put("folder", "songs");
+			options.put("public_id", filename);
+			options.put("use_filename", true);
+			options.put("unique_filename", false);
 			
 			return cloudinary.uploader().upload(song.getBytes(), options);
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 			throw new RuntimeException("Song upload failed");
+			
 		}
 	}
 	
@@ -50,8 +57,29 @@ public class CloudinaryService {
 				// TODO: handle exception
 				System.err.println(e);
 			}
-		}
+		} 
 		return uploadsong;
+	}
+	
+	public List<Song> getAllSongById(List<Map> songs){
+		System.out.println("Request reached in gASBI");
+		System.out.println(songs);
+		try {
+			List<Song> song_list = new ArrayList<Song>();
+			for(Map song : songs) {
+				Song s = new Song();
+				s.setPublicId((String)song.get("publicId"));
+				s.setTitle((String)song.get("display_name"));
+				s.setUrl((String)song.get("secure_url"));
+				song_list.add(s);
+			}
+			songRepository.saveAll(song_list);
+			return song_list;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public List<Song> getAllSongs(){
@@ -87,6 +115,30 @@ public class CloudinaryService {
 			throw new RuntimeException(
                     "Failed to fetch songs"
 					);
+		}
+	}
+	
+	
+	
+	public Map removeSongs(List<Song> song) {
+		try {
+			List<String> pId = song.stream().map(s -> s.getPublicId()).toList();
+			List<Long> id = song.stream().map(s -> s.getId()).toList();
+			Map res = cloudinary.api().deleteResources(pId, ObjectUtils.asMap("resource_type","video"));
+			System.out.println(res);
+			Map deleted = (Map) res.get("deleted");
+			if(deleted != null && deleted.values()
+                    .stream()
+                    .allMatch(
+                        s ->
+                        "deleted"
+                        .equals(s)
+                    )) songRepository.deleteAllById(id);
+			return res;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

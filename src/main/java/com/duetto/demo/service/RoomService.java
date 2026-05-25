@@ -2,6 +2,7 @@ package com.duetto.demo.service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.duetto.demo.dto.SyncMessage;
 import com.duetto.demo.entity.Room;
 import com.duetto.demo.entity.Users;
 import com.duetto.demo.repository.RoomRepository;
@@ -24,9 +26,12 @@ public class RoomService {
 	UserRepository userRepository;
 	
 	private Map<String, Set<String>> roomUsers = new ConcurrentHashMap<String, Set<String>>();
+	private ConcurrentHashMap<String, SyncMessage> roomState = new ConcurrentHashMap<String, SyncMessage>();
+	private ConcurrentHashMap<String, Object> roomLocks = new ConcurrentHashMap<String, Object>();
 	
 	public String createRoom(String hostId) {
 		String roomId = UUID.randomUUID().toString();
+		SyncMessage roomStateInitializer = new SyncMessage();
 		
 		Room room = new Room();
 		room.setRoomId(roomId);
@@ -37,7 +42,7 @@ public class RoomService {
 		
 		roomUsers.put(roomId, new HashSet<String>());
 		System.out.println(roomUsers.containsKey(roomId));
-		
+		roomState.put(roomId, roomStateInitializer);
 		return roomId;
 	}
 	
@@ -96,6 +101,44 @@ public class RoomService {
 		}
 		else {
 			return null;
+		}
+	}
+	
+	public boolean deleteRoom(Room room) {
+		try {
+			if(roomState.remove(room.getRoomId()) == null) { 
+				System.out.println("Room can be removed from cache");
+				return false; 
+				}
+			roomRepository.delete(room);
+			return true;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public List<Room> getAllRooms(){
+		try {
+			return roomRepository.findAll();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public SyncMessage getRoomState(String roomId) {
+		return roomState.get(roomId);
+	}
+	
+	public boolean updateRoomState(String roomId, SyncMessage rState) {
+		synchronized (
+					roomLocks.computeIfAbsent(roomId, l -> new Object())) {
+			if(!roomState.containsKey(roomId)) return false;
+			roomState.put(roomId, rState);
+			return true;
 		}
 	}
 }

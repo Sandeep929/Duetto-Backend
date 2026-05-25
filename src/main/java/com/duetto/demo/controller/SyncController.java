@@ -31,6 +31,10 @@ public class SyncController {
 		if(!roomRepository.existsById(roomId)) {
 			throw new RuntimeException("Room Not Found");
 		}
+		if(!roomService.updateRoomState(roomId, message)) {
+			System.out.println("Cache cant be upadate");
+			return null;
+		}
 		System.out.println("message from: "+message.getSender()+"Received: "+message.getAction()+ " for room: "+roomId);
 		return message;
 	}
