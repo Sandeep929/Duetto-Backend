@@ -13,6 +13,7 @@ public class Playlist {
 	private String playlistId;
 	private String userId;
 	private String playlistName;
+	
 	public String getPlaylistId() {
 		return playlistId;
 	}

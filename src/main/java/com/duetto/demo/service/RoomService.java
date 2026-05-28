@@ -107,7 +107,7 @@ public class RoomService {
 	public boolean deleteRoom(Room room) {
 		try {
 			if(roomState.remove(room.getRoomId()) == null) { 
-				System.out.println("Room can be removed from cache");
+				System.out.println("Room cant be removed from cache");
 				return false; 
 				}
 			roomRepository.delete(room);
@@ -136,9 +136,8 @@ public class RoomService {
 	public boolean updateRoomState(String roomId, SyncMessage rState) {
 		synchronized (
 					roomLocks.computeIfAbsent(roomId, l -> new Object())) {
-			if(!roomState.containsKey(roomId)) return false;
-			roomState.put(roomId, rState);
-			return true;
+				roomState.put(roomId, rState);
+				return true;
 		}
 	}
 }

@@ -14,18 +14,19 @@ public class Song {
 	private String title;
 	private String publicId;
 	private String url;
-	private int plays;
-	public int getPlays() {
-		return plays;
-	}
-	public void setPlays(int plays) {
-		this.plays = plays;
-	}
+	private Long plays;
+	
 	public Long getId() {
 		return id;
 	}
 	public void setId(Long id) {
 		this.id = id;
+	}
+	public Long getPlays() {
+		return plays;
+	}
+	public void setPlays(Long plays) {
+		this.plays = plays;
 	}
 	public String getTitle() {
 		return title;
